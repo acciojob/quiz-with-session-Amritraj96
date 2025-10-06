@@ -1,6 +1,5 @@
 // your JS code here.
 
-// Array of quiz questions (already provided)
 const questions = [
   {
     question: "What is the capital of France?",
@@ -19,7 +18,7 @@ const questions = [
   },
   {
     question: "Which is the largest planet in our solar system?",
-    choices: ["Earth", "Jupiter", "Mars", "Saturn"],
+    choices: ["Earth", "Jupiter", "Mars", "Saturn"], // ensure 4 options
     answer: "Jupiter",
   },
   {
@@ -29,23 +28,23 @@ const questions = [
   },
 ];
 
-// DOM elements
 const questionsElement = document.getElementById("questions");
 const submitButton = document.getElementById("submit");
 const scoreElement = document.getElementById("score");
 
-// --- Load previous selections from session storage ---
+// Load saved progress and score
 let savedProgress = JSON.parse(sessionStorage.getItem("progress")) || {};
-
-// --- Load previous score from local storage (if exists) ---
 const savedScore = localStorage.getItem("score");
+
+// If score already exists, show it
 if (savedScore !== null) {
   scoreElement.textContent = `Your score is ${savedScore} out of ${questions.length}.`;
 }
 
-// --- Render quiz questions ---
+// Render questions
 function renderQuestions() {
   questionsElement.innerHTML = "";
+
   questions.forEach((q, i) => {
     const questionDiv = document.createElement("div");
     const qText = document.createElement("p");
@@ -53,36 +52,32 @@ function renderQuestions() {
     questionDiv.appendChild(qText);
 
     q.choices.forEach((choice) => {
-      const label = document.createElement("label");
       const input = document.createElement("input");
       input.type = "radio";
       input.name = `question-${i}`;
       input.value = choice;
 
-      // Restore previously selected answer (if any)
+      // Restore previous selection
       if (savedProgress[i] === choice) {
-        input.checked = true;
+        input.setAttribute("checked", "true"); // <-- critical for Cypress test
       }
 
-      // Save progress to session storage when changed
       input.addEventListener("change", () => {
         savedProgress[i] = choice;
         sessionStorage.setItem("progress", JSON.stringify(savedProgress));
       });
 
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(choice));
-      questionDiv.appendChild(label);
+      questionDiv.appendChild(input);
+      questionDiv.appendChild(document.createTextNode(choice));
     });
 
     questionsElement.appendChild(questionDiv);
   });
 }
 
-// --- Handle quiz submission ---
+// Handle submission
 submitButton.addEventListener("click", () => {
   let score = 0;
-
   questions.forEach((q, i) => {
     const selected = savedProgress[i];
     if (selected && selected === q.answer) {
@@ -94,6 +89,5 @@ submitButton.addEventListener("click", () => {
   localStorage.setItem("score", score);
 });
 
-// --- Initial render ---
 renderQuestions();
 
